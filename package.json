@@ -1,0 +1,32 @@
+{
+  "name": "o2-metabolic-agent",
+  "version": "1.0.0",
+  "description": "O2: Autonomous Metabolic Engine — Self-sustaining AI agents powered by Uniswap yield on X Layer",
+  "type": "module",
+  "main": "dist/server.js",
+  "scripts": {
+    "build": "tsc",
+    "start": "node dist/server.js",
+    "dev": "tsx src/server.ts",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.12.0",
+    "@okxweb3/onchainos-sdk": "^1.0.0",
+    "@uniswap/sdk-core": "^5.3.1",
+    "@uniswap/v3-sdk": "^3.13.0",
+    "@uniswap/v4-sdk": "^1.6.1",
+    "ethers": "^6.13.4",
+    "viem": "^2.21.40",
+    "zod": "^3.23.8",
+    "dotenv": "^16.4.7"
+  },
+  "devDependencies": {
+    "@types/node": "^22.0.0",
+    "tsx": "^4.19.2",
+    "typescript": "^5.7.3"
+  },
+  "engines": {
+    "node": ">=20.0.0"
+  }
+}
