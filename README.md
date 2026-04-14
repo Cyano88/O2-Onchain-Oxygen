@@ -1,4 +1,4 @@
-# 🫁 O2 — Onchain Oxygen
+#  O2 — Onchain Oxygen
 
 ### *The Metabolic Agent Skill: Self-Sustaining Intelligence on X Layer*
 
