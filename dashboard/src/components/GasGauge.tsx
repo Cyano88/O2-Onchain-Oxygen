@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import type { GasHealth } from '../types';
 
 interface GasGaugeProps {
@@ -6,6 +6,7 @@ interface GasGaugeProps {
   okbBalance: string;
   okbBalanceUSD: number;
   isRefuelNeeded: boolean;
+  agentAddress: string;
 }
 
 function getHealthColor(pct: number): { stroke: string; glow: string; label: GasHealth } {
@@ -14,15 +15,16 @@ function getHealthColor(pct: number): { stroke: string; glow: string; label: Gas
   return { stroke: '#ef4444', glow: 'rgba(239,68,68,0.5)', label: 'critical' };
 }
 
-export function GasGauge({ healthPercent, okbBalance, okbBalanceUSD, isRefuelNeeded }: GasGaugeProps) {
+export function GasGauge({
+  healthPercent, okbBalance, okbBalanceUSD, isRefuelNeeded, agentAddress,
+}: GasGaugeProps) {
   const { stroke, glow, label } = getHealthColor(healthPercent);
+  const [copied, setCopied] = useState(false);
 
-  // SVG arc parameters
   const R = 72;
   const cx = 90;
   const cy = 90;
   const circumference = 2 * Math.PI * R;
-  // Use 270° of the circle (from 135° to 405°)
   const arcLength = circumference * 0.75;
   const offset = arcLength - (healthPercent / 100) * arcLength;
 
@@ -32,17 +34,27 @@ export function GasGauge({ healthPercent, okbBalance, okbBalanceUSD, isRefuelNee
     critical: 'text-[#ef4444]',
   };
 
+  async function handleCopy() {
+    try {
+      await navigator.clipboard.writeText(agentAddress);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    } catch {
+      // clipboard not available in some iframe contexts
+    }
+  }
+
+  const shortAddr = `${agentAddress.slice(0, 6)}…${agentAddress.slice(-4)}`;
+
   return (
-    <div className="flex flex-col items-center gap-3">
-      {/* Gauge */}
+    <div className="flex flex-col items-center gap-3 w-full">
+      {/* Arc Gauge */}
       <div className="relative" style={{ filter: `drop-shadow(0 0 12px ${glow})` }}>
         <svg width="180" height="180" viewBox="0 0 180 180">
           {/* Background track */}
           <circle
             cx={cx} cy={cy} r={R}
-            fill="none"
-            stroke="#1a2540"
-            strokeWidth="12"
+            fill="none" stroke="#1a2540" strokeWidth="12"
             strokeDasharray={`${arcLength} ${circumference}`}
             strokeLinecap="round"
             transform={`rotate(135 ${cx} ${cy})`}
@@ -50,9 +62,7 @@ export function GasGauge({ healthPercent, okbBalance, okbBalanceUSD, isRefuelNee
           {/* Active fill */}
           <circle
             cx={cx} cy={cy} r={R}
-            fill="none"
-            stroke={stroke}
-            strokeWidth="12"
+            fill="none" stroke={stroke} strokeWidth="12"
             strokeDasharray={`${arcLength} ${circumference}`}
             strokeDashoffset={offset}
             strokeLinecap="round"
@@ -69,12 +79,8 @@ export function GasGauge({ healthPercent, okbBalance, okbBalanceUSD, isRefuelNee
             GAS VITALITY
           </text>
         </svg>
-
-        {/* Heartbeat icon — pulses when critical */}
         {isRefuelNeeded && (
-          <div className="absolute top-2 right-2 text-[#ef4444] animate-heartbeat text-xl">
-            ♥
-          </div>
+          <div className="absolute top-2 right-2 text-[#ef4444] animate-heartbeat text-xl">♥</div>
         )}
       </div>
 
@@ -83,14 +89,48 @@ export function GasGauge({ healthPercent, okbBalance, okbBalanceUSD, isRefuelNee
         <div className={`font-mono text-2xl font-bold ${labelColors[label]}`}>
           {parseFloat(okbBalance).toFixed(4)} OKB
         </div>
-        <div className="font-mono text-sm text-slate-400">
-          ≈ ${okbBalanceUSD.toFixed(2)} USD
-        </div>
+        <div className="font-mono text-sm text-slate-400">≈ ${okbBalanceUSD.toFixed(2)} USD</div>
         <div className={`font-mono text-xs uppercase tracking-widest font-semibold ${labelColors[label]}`}>
           {label === 'healthy' && '● NOMINAL'}
-          {label === 'warning' && '⚠ LOW'}
-          {label === 'critical' && '⚡ CRITICAL — REFUEL NEEDED'}
+          {label === 'warning'  && '⚠ LOW'}
+          {label === 'critical' && '⚡ CRITICAL — AUTO-REFUEL PENDING'}
         </div>
+      </div>
+
+      {/* ── Wallet Address Display ────────────────────────────────────────── */}
+      {/* Prominently shows the agent wallet address so users know where to
+          send faucet OKB to trigger the autonomous_bootstrap event.       */}
+      <div className="w-full mt-1">
+        <div className="font-mono text-xs text-slate-500 uppercase tracking-widest mb-1.5 text-center">
+          Agent Wallet — Send Faucet OKB Here
+        </div>
+        <button
+          onClick={handleCopy}
+          title="Click to copy full address"
+          className={`w-full flex items-center justify-between gap-2 px-3 py-2 rounded-lg
+            border transition-all duration-200 group
+            ${copied
+              ? 'border-[#00ff88]/60 bg-[#00ff88]/10'
+              : 'border-surface-border bg-black/20 hover:border-[#38bdf8]/40 hover:bg-[#38bdf8]/5'
+            }`}
+        >
+          {/* Full address — truncated display, full value in clipboard */}
+          <span className="font-mono text-xs text-slate-300 truncate flex-1 text-left">
+            {agentAddress}
+          </span>
+          {/* Copy icon */}
+          <span className={`shrink-0 text-sm transition-colors ${copied ? 'text-[#00ff88]' : 'text-slate-600 group-hover:text-[#38bdf8]'}`}>
+            {copied ? '✔' : '⧉'}
+          </span>
+        </button>
+        {copied && (
+          <p className="font-mono text-xs text-[#00ff88] text-center mt-1 animate-scroll_up">
+            Address copied!
+          </p>
+        )}
+        <p className="font-mono text-[10px] text-slate-700 text-center mt-1">
+          Send ≥ 0.5 OKB to trigger autonomous_bootstrap
+        </p>
       </div>
     </div>
   );

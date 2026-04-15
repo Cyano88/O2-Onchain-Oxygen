@@ -16,7 +16,8 @@ import 'dotenv/config';
 
 // ─── X Layer Network Constants ──────────────────────────────────────────────
 export const X_LAYER_CHAIN_ID = Number(process.env.X_LAYER_CHAIN_ID ?? 195);
-export const X_LAYER_RPC = process.env.X_LAYER_RPC ?? 'https://testrpc.xlayer.tech';
+export const X_LAYER_RPC    = process.env.X_LAYER_RPC    ?? 'https://testrpc.xlayer.com';
+export const X_LAYER_WS_RPC = process.env.X_LAYER_WS_RPC ?? 'wss://testrpc.xlayer.com';
 export const OKLINK_BASE = 'https://www.oklink.com/xlayer';
 
 export const X_LAYER_VIEM_CHAIN = {
@@ -34,10 +35,13 @@ export const X_LAYER_VIEM_CHAIN = {
 
 // ─── Contract Addresses ──────────────────────────────────────────────────────
 export const ADDRESSES = {
-  V3_POSITION_MANAGER: process.env.V3_POSITION_MANAGER as `0x${string}`,
-  V4_POSITION_MANAGER: process.env.V4_POSITION_MANAGER as `0x${string}`,
-  UNISWAP_V3_FACTORY:  process.env.UNISWAP_V3_FACTORY  as `0x${string}`,
-  V4_POOL_MANAGER:     process.env.UNISWAP_V4_POOL_MANAGER as `0x${string}`,
+  // Uniswap V3 NonfungiblePositionManager — X Layer Testnet
+  V3_POSITION_MANAGER: (process.env.V3_POSITION_MANAGER ?? '0xc36442b4a4522e871399cd717abdd847ab11fe88') as `0x${string}`,
+  // Uniswap V4 PoolManager singleton — X Layer Testnet
+  V4_POOL_MANAGER:     (process.env.V4_POOL_MANAGER     ?? '0x000000000004444c5dc75cb358380d2e3de08a90') as `0x${string}`,
+  // Uniswap V4 PositionManager — X Layer Testnet
+  V4_POSITION_MANAGER: (process.env.V4_POSITION_MANAGER ?? '0x4B2C77d209D3405F41a037Ec6c77F7F5b8e2ca80') as `0x${string}`,
+  UNISWAP_V3_FACTORY:  (process.env.UNISWAP_V3_FACTORY  ?? '0x1F98431c8aD98523631AE4a59f267346ea31F984') as `0x${string}`,
   WOKB:                process.env.WOKB_ADDRESS as `0x${string}`,
   WETH:                process.env.WETH_ADDRESS as `0x${string}`,
   USDC:                process.env.USDC_ADDRESS as `0x${string}`,
