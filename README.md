@@ -373,6 +373,45 @@ Every metabolic cycle must generate at least 1.5× its gas cost. Implementation:
 
 ---
 
+## Testnet → Mainnet: One `.env` Change
+
+> *The current demo is executed on X Layer Testnet (chain 1952) for verification purposes, but the architecture is fully Mainnet-compatible. Switching to production only requires updating the RPC endpoint, chain ID, and contract addresses in the `.env` file.*
+
+```diff
+# .env — switch to X Layer Mainnet (chain 196)
+
+- X_LAYER_RPC=https://testrpc.xlayer.tech
+- X_LAYER_WS_RPC=wss://testrpc.xlayer.tech
+- X_LAYER_CHAIN_ID=1952
+
++ X_LAYER_RPC=https://rpc.xlayer.tech
++ X_LAYER_WS_RPC=wss://rpc.xlayer.tech
++ X_LAYER_CHAIN_ID=196
+
+# Contract addresses are canonical Uniswap singletons —
+# same addresses on every EVM chain where Uniswap is deployed.
+# Update these only if the mainnet deployment uses different addresses.
+- V3_POSITION_MANAGER=0xc36442b4a4522e871399cd717abdd847ab11fe88
+- V4_POOL_MANAGER=0x000000000004444c5dc75cb358380d2e3de08a90
+
++ V3_POSITION_MANAGER=<mainnet-address-once-uniswap-deploys>
++ V4_POOL_MANAGER=<mainnet-address-once-uniswap-deploys>
+```
+
+No code changes. No redeployment. No recompilation. The MCP server, WebSocket listener, Profitability Guard, and all SDK integrations are network-agnostic by design — they read chain configuration entirely from environment variables at runtime.
+
+| Component | Testnet (now) | Mainnet (production) |
+|-----------|--------------|----------------------|
+| Chain ID | 1952 | 196 |
+| HTTP RPC | `testrpc.xlayer.tech` | `rpc.xlayer.tech` |
+| WebSocket | `wss://testrpc.xlayer.tech` | `wss://rpc.xlayer.tech` |
+| Gas token | OKB (testnet) | OKB (mainnet) |
+| Uniswap V3/V4 | Pending deployment | Active when deployed |
+| OKX DEX | Available | Available |
+| Agent wallet | Any EVM keypair | Same keypair, funded with mainnet OKB |
+
+---
+
 ## Why X Layer?
 
 | Feature | Benefit for O2 |
