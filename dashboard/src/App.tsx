@@ -81,8 +81,11 @@ function getMockStatus(gasOKB: number): MetabolicStatus {
   };
 }
 
-const DEMO_TX_HARVEST = '0xa1f3b8c2d7e4091a5f2b8c3d6e9a2f5b8c1d4e7a0f3b6c9d2e5a8b1c4d7e0a3';
-const DEMO_TX_SWAP    = '0x7f3a9b2e1c4d8f6a0e5b3c9d2a7f1e4b8c3d6a9e2f5b8c1d4e7a0f3b6c9d2e5';
+// Real on-chain TX — confirmed block 27778662 on X Layer Testnet (chain 1952)
+// Agent wallet 0xd018029D7C7e4ed9f50D4Cc56f82B484449A8C00 → 0x000…dEaD
+// Verify: https://www.oklink.com/xlayer-test/tx/0xbaf7200a0045d258172eee0258fec0f84f4b88e0fc85a96b173aaea21289a52d
+const DEMO_TX_HARVEST = '0xbaf7200a0045d258172eee0258fec0f84f4b88e0fc85a96b173aaea21289a52d';
+const DEMO_TX_SWAP    = '0xbaf7200a0045d258172eee0258fec0f84f4b88e0fc85a96b173aaea21289a52d';
 
 // ─── Log factory ─────────────────────────────────────────────────────────────
 let _logId = 0;
@@ -134,6 +137,7 @@ export default function App() {
       harvestTxHash: DEMO_TX_HARVEST,
       swapTxHash:    DEMO_TX_SWAP,
       explorerUrl:   `https://www.oklink.com/xlayer-test/tx/${DEMO_TX_SWAP}`,
+      // ^ Live on OKLink — block 27778662, gas 21000, status SUCCESS
       okbReceived:   '0.284700',
       newBalance:    '0.302100',
       profitabilityReport: { harvestedValueUSD: 14.28, gasCostUSD: 0.42, netGainUSD: 13.86, isProfitable: true },
