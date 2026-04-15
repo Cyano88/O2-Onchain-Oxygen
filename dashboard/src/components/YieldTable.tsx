@@ -109,7 +109,7 @@ export function YieldTable({
               Yield Stomach
             </h2>
             <p className="font-mono text-xs text-slate-500">
-              Uniswap V3 (0xc364…fe88) + V4 (0x0000…4a90) · Auto-harvested
+              Uniswap V3 + V4 · Chain 1952 · Auto-harvested by agent
             </p>
           </div>
         </div>

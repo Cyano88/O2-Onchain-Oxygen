@@ -15,9 +15,13 @@ import { VerificationPanel } from './components/ExplorerLink';
 import type { MetabolicStatus, RefuelResult, LogEntry } from './types';
 
 // ─── Constants ────────────────────────────────────────────────────────────────
-const AGENT_ADDRESS   = '0xDe3d98c01C4B4EFe09F25A1EeC34dE64aCe7B48E';
-const CHAIN_ID        = 195;
-const WS_RPC          = 'wss://testrpc.xlayer.com';
+// Real agent wallet — generated 2026-04-15, verified 0x0 balance (fresh)
+const AGENT_ADDRESS   = '0xd018029D7C7e4ed9f50D4Cc56f82B484449A8C00';
+// X Layer Testnet chain ID: 1952 (0x7a0) — confirmed live via eth_chainId
+const CHAIN_ID        = 1952;
+// Live RPC — testrpc.xlayer.tech confirmed responding, testrpc.xlayer.com is dead
+const WS_RPC          = 'wss://testrpc.xlayer.tech';
+const HTTP_RPC        = 'https://testrpc.xlayer.tech';
 const MIN_GAS_OKB     = 0.05;
 const BOOTSTRAP_THRESHOLD_OKB = 0.5;  // incoming tx threshold for autonomous_bootstrap
 const POLL_INTERVAL_MS = 60_000;       // 60-second metabolism cycle
@@ -28,8 +32,11 @@ const xLayerTestnet = {
   name: 'X Layer Testnet',
   nativeCurrency: { name: 'OKB', symbol: 'OKB', decimals: 18 },
   rpcUrls: {
-    default: { webSocket: [WS_RPC] },
-    public:  { webSocket: [WS_RPC] },
+    default: { http: [HTTP_RPC], webSocket: [WS_RPC] },
+    public:  { http: [HTTP_RPC], webSocket: [WS_RPC] },
+  },
+  blockExplorers: {
+    default: { name: 'OKLink', url: 'https://www.oklink.com/xlayer-test' },
   },
 } as const;
 
@@ -70,6 +77,7 @@ function getMockStatus(gasOKB: number): MetabolicStatus {
       ? `GAS CRITICAL (${pct}%). Autonomous harvest queued — V3 #882 ($14.28 available).`
       : `Gas nominal (${pct}%). Metabolism idle. Next poll in 60s.`,
     explorerUrl: `https://www.oklink.com/xlayer-test/address/${AGENT_ADDRESS}`,
+    // ^ OKLink X Layer Testnet explorer — chain 1952
   };
 }
 
@@ -91,7 +99,7 @@ export default function App() {
   const [logs,            setLogs]            = useState<LogEntry[]>([
     makeLog('info',    'O2 Metabolic Agent initialised — X Layer Testnet (Chain 195)'),
     makeLog('info',    `Wallet: ${AGENT_ADDRESS}`),
-    makeLog('info',    `Contracts: V3 PositionManager 0xc364…fe88 · V4 PoolManager 0x0000…a90`),
+    makeLog('info',    `Contracts: V3 0xc364…fe88 (canonical) · V4 Pool 0x0000…4a90 (canonical) · Permit2 ✓ deployed`),
   ]);
   const [wsConnected,     setWsConnected]     = useState(false);
   const [isSelfMaintaining, setIsSelfMaintaining] = useState(true);
@@ -190,7 +198,7 @@ export default function App() {
     }
 
     connect();
-    addLog('info', `WebSocket listener → wss://testrpc.xlayer.com — watching for incoming OKB…`);
+    addLog('info', `WebSocket listener → ${WS_RPC} (chain ${CHAIN_ID}) — watching for incoming OKB…`);
 
     return () => {
       unwatch?.();
@@ -269,7 +277,7 @@ export default function App() {
             {wsConnected ? `WS LIVE ${lastEventBlock ?? ''}` : 'WS connecting…'}
           </span>
           <span className="text-slate-600">|</span>
-          <span>X Layer Testnet · Chain 195</span>
+          <span>X Layer Testnet · Chain 1952</span>
           <span className="text-slate-600">|</span>
           <span className={
             healthStatus === 'NOMINAL' ? 'text-[#00ff88]' :
@@ -382,13 +390,17 @@ export default function App() {
             <div className="font-mono text-xs text-slate-400 uppercase tracking-widest">Contract Addresses</div>
             <div className="space-y-2">
               {[
-                { label: 'V3 PositionMgr', addr: '0xc36442b4a4522e871399cd717abdd847ab11fe88' },
-                { label: 'V4 PoolManager', addr: '0x000000000004444c5dc75cb358380d2e3de08a90' },
-                { label: 'RPC', addr: 'https://testrpc.xlayer.com' },
-              ].map(({ label, addr }) => (
+                { label: 'V3 PositionMgr', addr: '0xc36442b4a4522e871399cd717abdd847ab11fe88', ok: false },
+                { label: 'V4 PoolManager', addr: '0x000000000004444c5dc75cb358380d2e3de08a90', ok: false },
+                { label: 'Permit2',        addr: '0x000000000022D473030F116dDEE9F6B43aC78BA3', ok: true  },
+                { label: 'RPC',            addr: HTTP_RPC, ok: true },
+              ].map(({ label, addr, ok }) => (
                 <div key={label} className="flex items-center justify-between gap-2">
-                  <span className="font-mono text-xs text-slate-500 shrink-0">{label}</span>
-                  <span className="font-mono text-xs text-slate-400 truncate">
+                  <span className="font-mono text-xs text-slate-500 shrink-0 flex items-center gap-1">
+                    <span className={`w-1.5 h-1.5 rounded-full ${ok ? 'bg-[#00ff88]' : 'bg-[#f59e0b]'}`} />
+                    {label}
+                  </span>
+                  <span className={`font-mono text-xs truncate ${ok ? 'text-slate-400' : 'text-[#f59e0b]'}`}>
                     {addr.startsWith('0x') ? `${addr.slice(0, 10)}…${addr.slice(-6)}` : addr}
                   </span>
                 </div>
@@ -403,6 +415,7 @@ export default function App() {
         <footer className="text-center font-mono text-xs text-slate-700 py-4 border-t border-surface-border">
           O2 Metabolic Agent · OKX X Layer "Build X" Hackathon ·{' '}
           <a href={`https://www.oklink.com/xlayer-test/address/${AGENT_ADDRESS}`}
+            title={`Chain 1952 · ${AGENT_ADDRESS}`}
             target="_blank" rel="noopener noreferrer"
             className="text-slate-600 hover:text-slate-400 transition-colors">
             View Agent on OKLink ↗

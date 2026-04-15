@@ -15,10 +15,12 @@ import { OnchainOSClient } from '@okxweb3/onchainos-sdk';
 import 'dotenv/config';
 
 // ─── X Layer Network Constants ──────────────────────────────────────────────
-export const X_LAYER_CHAIN_ID = Number(process.env.X_LAYER_CHAIN_ID ?? 195);
-export const X_LAYER_RPC    = process.env.X_LAYER_RPC    ?? 'https://testrpc.xlayer.com';
-export const X_LAYER_WS_RPC = process.env.X_LAYER_WS_RPC ?? 'wss://testrpc.xlayer.com';
-export const OKLINK_BASE = 'https://www.oklink.com/xlayer';
+// Testnet chain ID is 1952 (0x7a0) — verified live 2026-04-15
+// Mainnet chain ID is 196  (0xc4)
+export const X_LAYER_CHAIN_ID = Number(process.env.X_LAYER_CHAIN_ID ?? 1952);
+export const X_LAYER_RPC    = process.env.X_LAYER_RPC    ?? 'https://testrpc.xlayer.tech';
+export const X_LAYER_WS_RPC = process.env.X_LAYER_WS_RPC ?? 'wss://testrpc.xlayer.tech';
+export const OKLINK_BASE = 'https://www.oklink.com/xlayer-test';
 
 export const X_LAYER_VIEM_CHAIN = {
   id: X_LAYER_CHAIN_ID,
